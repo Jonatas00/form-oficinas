@@ -4,17 +4,31 @@ import ModalComponent from "@/components/ModalComponent.vue";
 import { Button } from "@/components/ui/button";
 import { ref, onMounted } from "vue";
 
+// Tipagens
+interface Oficina {
+  id: number;
+  nome: string;
+  local: string;
+  limite_turno1: number;
+  limite_turno2: number;
+}
+
+interface RespostaInscricao {
+  sucesso?: boolean;
+  error?: string;
+}
+
 // Refs e estado
 const nome = ref("");
 const email = ref("");
-const oficinaId = ref("");
+const oficinaId = ref<string>("");
 const turno = ref("");
-const oficinas = ref([]);
+const oficinas = ref<Oficina[]>([]);
 const mensagem = ref("");
 const sucesso = ref(false);
 const modalRef = ref<InstanceType<typeof ModalComponent> | null>(null);
 
-const API = "https://api-profs-oficina.onrender.com";
+const API = import.meta.env.VITE_API_URL as string;
 
 async function carregarOficinas() {
   const res = await fetch(`${API}/oficinas`);
@@ -55,13 +69,13 @@ async function inscrever() {
     }),
   });
 
-  const data = await res.json();
+  const data: RespostaInscricao = await res.json();
 
   if (res.ok && data.sucesso) {
     mensagem.value = "Inscrição realizada com sucesso!";
     sucesso.value = true;
     await carregarOficinas();
-    modalRef.value?.open();
+    modalRef.value?.openModal();
   } else {
     mensagem.value = data.error || "Erro ao realizar inscrição.";
   }
@@ -91,8 +105,8 @@ onMounted(carregarOficinas);
           <option disabled value="">Selecione</option>
           <option v-for="oficina in oficinas" :key="oficina.id" :value="oficina.id"
             :disabled="oficina.limite_turno1 === 0 && oficina.limite_turno2 === 0">
-            {{ oficina.nome }} ({{ oficina.local }}) | Vagas: T1 {{ oficina.limite_turno1 }}, T2
-            {{ oficina.limite_turno2 }}
+            {{ oficina.nome }} ({{ oficina.local }}) |
+            Vagas: T1 {{ oficina.limite_turno1 }}, T2 {{ oficina.limite_turno2 }}
           </option>
         </select>
       </div>
