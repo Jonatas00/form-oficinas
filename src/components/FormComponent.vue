@@ -107,6 +107,10 @@ onMounted(carregarOficinas);
             {{ oficina.nome }} ({{ oficina.local }}) |
             Vagas manhã: {{ oficina.limite_turno1 }},
             Vagas tarde: {{ oficina.limite_turno2 }}
+<<<<<<< HEAD
+=======
+          
+>>>>>>> 6e80faa661f97aba7be485b3ae73183ed1fb2306
           </option>
         </select>
       </div>
