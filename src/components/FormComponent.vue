@@ -19,7 +19,7 @@ interface RespostaInscricao {
 
 const nome = ref("");
 const email = ref("");
-const oficinaId = ref("");
+const oficinaId = ref<string>("");
 const turno = ref("");
 const oficinas = ref<Oficina[]>([]);
 const mensagem = ref("");
@@ -70,6 +70,8 @@ const inscrever = async () => {
 
   const data: RespostaInscricao = await response.json();
 
+
+
   if (response.ok && data.sucesso) {
     mensagem.value = "Inscrição realizada com sucesso!";
     sucesso.value = true;
@@ -107,6 +109,7 @@ onMounted(carregarOficinas);
             {{ oficina.nome }} ({{ oficina.local }}) |
             Vagas manhã: {{ oficina.limite_turno1 }},
             Vagas tarde: {{ oficina.limite_turno2 }}
+          
           </option>
         </select>
       </div>
