@@ -1,93 +1,122 @@
 <script lang="ts" setup>
 import AlertComponent from "@/components/AlertComponent.vue";
+import ModalComponent from "@/components/ModalComponent.vue";
 import { Button } from "@/components/ui/button";
-import { useFormState } from "@/states/formState";
-import { useFormUtils } from "@/utils/formUtils";
-import { ref } from "vue";
-import ModalComponent from "@/components/ModalComponent.vue"; // Correct import
+import { ref, onMounted } from "vue";
 
-// Form state
-const { form, alertState, isLoading, resetForm } = useFormState();
-
-// Reference for the ModalComponent
+// Refs e estado
+const nome = ref("");
+const email = ref("");
+const oficinaId = ref("");
+const turno = ref("");
+const oficinas = ref([]);
+const mensagem = ref("");
+const sucesso = ref(false);
 const modalRef = ref<InstanceType<typeof ModalComponent> | null>(null);
 
-const { handleSubmit, updateCPF, updateWhatsApp } = useFormUtils(form, alertState, isLoading, resetForm, modalRef);
+const API = "https://api-profs-oficina.onrender.com";
+
+async function carregarOficinas() {
+  const res = await fetch(`${API}/oficinas`);
+  oficinas.value = await res.json();
+}
+
+async function inscrever() {
+  mensagem.value = "";
+  sucesso.value = false;
+
+  const oficinaSelecionada = oficinas.value.find(
+    (o) => o.id === parseInt(oficinaId.value)
+  );
+
+  if (!oficinaSelecionada) {
+    mensagem.value = "Oficina inválida.";
+    return;
+  }
+
+  const vagasDisponiveis =
+    turno.value === "turno1"
+      ? oficinaSelecionada.limite_turno1
+      : oficinaSelecionada.limite_turno2;
+
+  if (vagasDisponiveis <= 0) {
+    mensagem.value = "Limite de vagas atingido para o turno selecionado.";
+    return;
+  }
+
+  const res = await fetch(`${API}/inscrever`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nome: nome.value,
+      email: email.value,
+      oficina_id: parseInt(oficinaId.value),
+      turno: turno.value,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (res.ok && data.sucesso) {
+    mensagem.value = "Inscrição realizada com sucesso!";
+    sucesso.value = true;
+    await carregarOficinas();
+    modalRef.value?.open();
+  } else {
+    mensagem.value = data.error || "Erro ao realizar inscrição.";
+  }
+}
+
+onMounted(carregarOficinas);
 </script>
 
 <template>
-  <!-- Alert Component -->
-  <AlertComponent v-if="alertState.message" :message="alertState.message" :statusCode="alertState.statusCode" />
+  <AlertComponent v-if="mensagem" :message="mensagem" :statusCode="sucesso ? 200 : 400" />
 
   <div class="shadow-lg bg-white p-4 rounded-lg">
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <div>
-        <label for="cpf">CPF</label>
-        <input id="cpf" v-model="form.cpf" @input="updateCPF" class="p-2 w-full" placeholder="000.000.000-00" required
-          type="text" inputmode="numeric" />
-      </div>
-
+    <form class="space-y-4" @submit.prevent="inscrever">
       <div>
         <label for="nome">Nome</label>
-        <input id="nome" v-model="form.nome" class="p-2 w-full" placeholder="Nome completo" required type="text" />
-      </div>
-
-      <div>
-        <label for="dataNascimento">Data de Nascimento</label>
-        <input id="dataNascimento" v-model="form.dataNasc" class="text-neutral-400 p-2 w-full" required type="date" />
-      </div>
-
-      <div>
-        <label for="whatsapp">WhatsApp</label>
-        <input id="whatsapp" v-model="form.whatsapp" @input="updateWhatsApp" class="p-2 w-full"
-          placeholder="ddd + telefone" required type="text" inputmode="numeric" maxlength="15" />
+        <input id="nome" v-model="nome" class="p-2 w-full" required type="text" placeholder="Seu nome" />
       </div>
 
       <div>
         <label for="email">Email</label>
-        <input id="email" v-model="form.email" class="p-2 w-full" placeholder="email@gmail.com" required type="email"
-          inputmode="email" />
+        <input id="email" v-model="email" class="p-2 w-full" required type="email" placeholder="email@email.com" />
       </div>
 
       <div>
-        <label for="anoFormacao">
-          Ano em que se formou no Rainha
-        </label>
-        <input id="anoFormacao" min="1950" max="2024" v-model="form.dataFormacao" class="p-2 w-full"
-          placeholder="Ex: 2005" type="number" inputmode="numeric" />
-      </div>
-
-      <div>
-        <label for="anoSaida">
-          Caso não tenha terminado o Ensino Médio no Rainha, em que ano saiu do Colégio?
-        </label>
-        <input id="anoSaida" min="1950" max="2024" v-model="form.dataSaida" placeholder="Ex: 2005" class="p-2 w-full"
-          type="number" inputmode="numeric" />
-      </div>
-
-      <div>
-        <label for="possuiFilho">
-          Possui filho matriculado no Rainha?
-        </label>
-        <select id="possuiFilho" v-model="form.filhoMatriculado" class="p-2 w-full border block">
-          <option value="" disabled>Selecione uma opção</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
+        <label for="oficina">Oficina</label>
+        <select id="oficina" v-model="oficinaId" required class="p-2 w-full border block">
+          <option disabled value="">Selecione</option>
+          <option v-for="oficina in oficinas" :key="oficina.id" :value="oficina.id"
+            :disabled="oficina.limite_turno1 === 0 && oficina.limite_turno2 === 0">
+            {{ oficina.nome }} ({{ oficina.local }}) | Vagas: T1 {{ oficina.limite_turno1 }}, T2
+            {{ oficina.limite_turno2 }}
+          </option>
         </select>
       </div>
 
-      <Button class="flex w-50 hover:bg-[#415272]" :disabled="isLoading">Enviar</Button>
+      <div>
+        <label for="turno">Turno</label>
+        <select id="turno" v-model="turno" required class="p-2 w-full border block">
+          <option disabled value="">Selecione</option>
+          <option value="turno1">Turno 1</option>
+          <option value="turno2">Turno 2</option>
+        </select>
+      </div>
+
+      <Button class="flex w-full hover:bg-blue-700" :disabled="false">Inscrever</Button>
     </form>
   </div>
 
-  <!-- Include ModalComponent with ref -->
-  <ModalComponent v-if="alertState.statusCode === 200" ref="modalRef" />
+  <ModalComponent v-if="sucesso" ref="modalRef" />
 </template>
 
 <style scoped>
 input,
-option,
-select {
+select,
+option {
   @apply bg-neutral-50 border rounded-md px-3;
 }
 
@@ -97,10 +126,5 @@ input::placeholder {
 
 option[disabled] {
   @apply text-neutral-300;
-}
-
-.opcional {
-  opacity: 0.5;
-  font-size: 11px;
 }
 </style>
