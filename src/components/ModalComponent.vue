@@ -21,10 +21,9 @@ defineExpose({ openModal });
 			<div class="flex flex-col items-center">
 				<h3 class="text-xl font-semibold text-green-600">Agradecemos pelas informações</h3>
 				<div class="py-5 text-justify">
-					<p>Será um prazer recebe-lo novamente no Rainha!</p>
-					<p>
-						Em breve você receberá via e-mail o convite nominal para seu ingresso no evento.
-					</p>
+					<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Saepe laborum assumenda impedit accusamus!
+						Ducimus, sapiente laborum? Recusandae, facere aliquid corrupti vero asperiores iure dolorum atque omnis
+						deleniti assumenda! Recusandae, officia.</p>
 				</div>
 				<Button class="w-[50%] hover:bg-[#415272]" @click="closeModal">Fechar</Button>
 			</div>

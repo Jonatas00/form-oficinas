@@ -11,9 +11,9 @@ const isError = !props.sucesso;
 </script>
 
 <template>
-  <Alert :class="isError
-      ? 'bg-red-100 border-red-500 text-red-800'
-      : 'bg-green-100 border-green-500 text-green-800'
+  <Alert class="my-2" :class="isError
+    ? 'bg-red-100 border-red-500 text-red-800'
+    : 'bg-green-100 border-green-500 text-green-800'
     ">
     <component :is="isError ? XCircle : CheckCircle" class="h-4 w-4" />
     <AlertTitle>{{ isError ? "Erro!" : "Sucesso!" }}</AlertTitle>
