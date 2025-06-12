@@ -2,7 +2,7 @@
 import AlertComponent from "@/components/AlertComponent.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
 import { Button } from "@/components/ui/button";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 interface Oficina {
   id: number;
@@ -33,14 +33,15 @@ const carregarOficinas = async () => {
   oficinas.value = await response.json();
 };
 
-const oficinaSelecionada = () =>
-  oficinas.value.find(oficina => oficina.id === Number(oficinaId.value));
+const oficinaSelecionada = computed(() =>
+  oficinas.value.find(oficina => oficina.id === Number(oficinaId.value))
+);
 
 const turnoDisponivel = (oficina: Oficina) =>
   turno.value === "turno1" ? oficina.limite_turno1 : oficina.limite_turno2;
 
 const validarInscricao = () => {
-  const oficina = oficinaSelecionada();
+  const oficina = oficinaSelecionada.value;
   if (!oficina) return "Oficina inválida.";
   if (turnoDisponivel(oficina) <= 0)
     return "Limite de vagas atingido para o turno selecionado.";
@@ -69,8 +70,6 @@ const inscrever = async () => {
   });
 
   const data: RespostaInscricao = await response.json();
-
-
 
   if (response.ok && data.sucesso) {
     mensagem.value = "Inscrição realizada com sucesso!";
@@ -109,7 +108,6 @@ onMounted(carregarOficinas);
             {{ oficina.nome }} ({{ oficina.local }}) |
             Vagas manhã: {{ oficina.limite_turno1 }},
             Vagas tarde: {{ oficina.limite_turno2 }}
-          
           </option>
         </select>
       </div>
@@ -118,8 +116,12 @@ onMounted(carregarOficinas);
         <label for="turno">Turno</label>
         <select id="turno" v-model="turno" required class="p-2 w-full border block">
           <option disabled value="">Selecione</option>
-          <option value="turno1">Manhã - 9h30 às 11h30</option>
-          <option value="turno2">Tarde - 11h30 às 13h30</option>
+          <option value="turno1" :disabled="oficinaSelecionada && oficinaSelecionada.limite_turno1 === 0">
+            Manhã - 9h30 às 11h30
+          </option>
+          <option value="turno2" :disabled="oficinaSelecionada && oficinaSelecionada.limite_turno2 === 0">
+            Tarde - 11h30 às 13h30
+          </option>
         </select>
       </div>
 
