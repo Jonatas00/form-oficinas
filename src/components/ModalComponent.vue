@@ -12,7 +12,6 @@ const closeModal = () => {
 	showModal.value = false;
 };
 
-// Expose the openModal function so the parent can call it
 defineExpose({ openModal });
 </script>
 <template>
@@ -21,9 +20,7 @@ defineExpose({ openModal });
 			<div class="flex flex-col items-center">
 				<h3 class="text-xl font-semibold text-green-600">Agradecemos pelas informações</h3>
 				<div class="py-5 text-justify">
-					<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Saepe laborum assumenda impedit accusamus!
-						Ducimus, sapiente laborum? Recusandae, facere aliquid corrupti vero asperiores iure dolorum atque omnis
-						deleniti assumenda! Recusandae, officia.</p>
+					<p>Sua inscrição para oficina foi registrada com sucesso!</p>
 				</div>
 				<Button class="w-[50%] hover:bg-[#415272]" @click="closeModal">Fechar</Button>
 			</div>

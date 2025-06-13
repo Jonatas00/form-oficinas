@@ -76,6 +76,11 @@ const inscrever = async () => {
     sucesso.value = true;
     await carregarOficinas();
     modalRef.value?.openModal();
+
+    nome.value = "";
+    email.value = "";
+    oficinaId.value = "";
+    turno.value = "";
   } else {
     mensagem.value = data.error || "Erro ao realizar inscrição.";
   }
