@@ -122,10 +122,10 @@ onMounted(carregarOficinas);
         <select id="turno" v-model="turno" required class="p-2 w-full border block">
           <option disabled value="">Selecione</option>
           <option value="turno1" :disabled="oficinaSelecionada && oficinaSelecionada.limite_turno1 === 0">
-            Manhã - 9h30 às 11h30
+            9h30 às 11h30
           </option>
           <option value="turno2" :disabled="oficinaSelecionada && oficinaSelecionada.limite_turno2 === 0">
-            Tarde - 11h30 às 13h30
+            11h30 às 13h30
           </option>
         </select>
       </div>
